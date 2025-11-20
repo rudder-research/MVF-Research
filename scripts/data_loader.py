@@ -1,86 +1,102 @@
+# ============================================================
+# VCF Research - Unified Data Loader (Colab + Windows Safe)
+# ============================================================
+
 import os
 import json
 import pandas as pd
 import yfinance as yf
 from pathlib import Path
-from dotenv import load_dotenv
+from datetime import datetime
 
-# ------------------------------------------------------
-# AUTO-DETECT BASE DIRECTORY (works on Colab + Windows)
-# ------------------------------------------------------
-from pathlib import Path
+# ------------------------------------------------------------
+# Dynamic BASE_DIR: works on Colab, Linux, Windows
+# ------------------------------------------------------------
+if "__file__" in globals():
+    BASE_DIR = Path(__file__).resolve().parents[1]
+else:
+    BASE_DIR = Path("/content/VCF-RESEARCH")
 
-BASE_DIR = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = BASE_DIR / "registry" / "vcf_metric_registry.json"
-RAW_DIR = BASE_DIR / "data_raw"
-RAW_DIR.mkdir(parents=True, exist_ok=True)
+DATA_RAW = BASE_DIR / "data_raw"
+DATA_RAW.mkdir(exist_ok=True, parents=True)
 
+print("Using BASE_DIR:", BASE_DIR)
+print("Registry:", REGISTRY_PATH)
 
-RAW_DIR.mkdir(parents=True, exist_ok=True)
-
-# ------------------------------------------------------
-# LOAD REGISTRY
-# ------------------------------------------------------
+# ------------------------------------------------------------
+# Load registry
+# ------------------------------------------------------------
 def load_registry():
     if not REGISTRY_PATH.exists():
-        raise FileNotFoundError(f"Registry not found: {REGISTRY_PATH}")
-
+        raise FileNotFoundError(f"Registry missing at: {REGISTRY_PATH}")
     with open(REGISTRY_PATH, "r") as f:
         return json.load(f)
 
-# ------------------------------------------------------
-# FETCH FRED
-# ------------------------------------------------------
+# ------------------------------------------------------------
+# Fetchers
+# ------------------------------------------------------------
 def fetch_fred_series(ticker):
+    """Uses public CSV endpoint—no API key needed."""
     url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={ticker}"
     df = pd.read_csv(url)
-
     df.rename(columns={df.columns[0]: "date", df.columns[1]: "value"}, inplace=True)
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    df = df.dropna(subset=["date"])
-    df = df.set_index("date")
+    df = df.dropna()
+    df.set_index("date", inplace=True)
     return df
 
-# ------------------------------------------------------
-# FETCH YAHOO
-# ------------------------------------------------------
+
 def fetch_yahoo_series(ticker):
-    df = yf.download(ticker, progress=False)
+    df = yf.download(ticker, start="1990-01-01", auto_adjust=True, progress=False)
 
-    if "Adj Close" in df:
-        df = df[["Adj Close"]].rename(columns={"Adj Close": "price"})
-    else:
-        df = df[["Close"]].rename(columns={"Close": "price"})
+    if df.empty:
+        raise ValueError(f"No data from Yahoo for {ticker}")
 
+    col = None
+    for c in ["Adj Close", "Close", "Price"]:
+        if c in df.columns:
+            col = c
+            break
+
+    if not col:
+        raise ValueError(f"No usable price column from Yahoo for {ticker}")
+
+    df = df[[col]].rename(columns={col: "value"})
     df.index.name = "date"
+    df = df.dropna()
     return df
 
-# ------------------------------------------------------
-# MAIN LOADER
-# ------------------------------------------------------
+# ------------------------------------------------------------
+# Main loader
+# ------------------------------------------------------------
 def load_all_metrics():
     registry = load_registry()
-    print("\n🚀 Starting full VCF data load...")
+    print(f"\n🚀 Loading {len(registry)} metrics...\n")
 
     for metric_id, meta in registry.items():
-        src = meta.get("source")
-        ticker = meta.get("ticker")
+        src = meta["source"].upper()
+        ticker = meta["ticker"]
+        out_path = DATA_RAW / f"{metric_id}.csv"
 
-        print(f"\n📡 Fetching {metric_id}: {meta['display_name']}  (Source: {src})")
+        print(f"📡 {metric_id} → {src} ({ticker})")
 
         if src == "FRED":
             df = fetch_fred_series(ticker)
         elif src == "YAHOO":
             df = fetch_yahoo_series(ticker)
         else:
-            print(f"⚠ Unsupported source: {src}")
+            print(f"⚠ Unsupported source {src} — skipping")
             continue
 
-        out_path = RAW_DIR / f"{metric_id}.csv"
         df.to_csv(out_path)
-        print(f"✔ Saved to {out_path}  ({len(df)} rows)")
+        print(f"✔ Saved {len(df)} rows to {out_path}")
 
-# ------------------------------------------------------
+    print("\n🎉 Data loading complete!")
+
+
+# ------------------------------------------------------------
+# Entrypoint
+# ------------------------------------------------------------
 if __name__ == "__main__":
     load_all_metrics()
-
