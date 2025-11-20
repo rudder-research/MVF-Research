@@ -1,102 +1,91 @@
-# ============================================================
-# VCF Research - Unified Data Loader (Colab + Windows Safe)
-# ============================================================
-
 import os
 import json
 import pandas as pd
-import yfinance as yf
 from pathlib import Path
-from datetime import datetime
+from fredapi import Fred
+import yfinance as yf
 
-# ------------------------------------------------------------
-# Dynamic BASE_DIR: works on Colab, Linux, Windows
-# ------------------------------------------------------------
-if "__file__" in globals():
-    BASE_DIR = Path(__file__).resolve().parents[1]
-else:
-    BASE_DIR = Path("/content/VCF-RESEARCH")
-
+# ======================================================
+# Dynamic Paths — WORKS BOTH IN COLAB AND ON PC
+# ======================================================
+BASE_DIR = Path(os.getcwd())
 REGISTRY_PATH = BASE_DIR / "registry" / "vcf_metric_registry.json"
 DATA_RAW = BASE_DIR / "data_raw"
+
+# Ensure folders exist
 DATA_RAW.mkdir(exist_ok=True, parents=True)
 
-print("Using BASE_DIR:", BASE_DIR)
-print("Registry:", REGISTRY_PATH)
-
-# ------------------------------------------------------------
-# Load registry
-# ------------------------------------------------------------
+# ======================================================
+# Load Registry
+# ======================================================
 def load_registry():
     if not REGISTRY_PATH.exists():
-        raise FileNotFoundError(f"Registry missing at: {REGISTRY_PATH}")
+        raise FileNotFoundError(f"Registry missing: {REGISTRY_PATH}")
     with open(REGISTRY_PATH, "r") as f:
         return json.load(f)
 
-# ------------------------------------------------------------
-# Fetchers
-# ------------------------------------------------------------
-def fetch_fred_series(ticker):
-    """Uses public CSV endpoint—no API key needed."""
-    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={ticker}"
-    df = pd.read_csv(url)
-    df.rename(columns={df.columns[0]: "date", df.columns[1]: "value"}, inplace=True)
-    df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    df = df.dropna()
-    df.set_index("date", inplace=True)
+# ======================================================
+# FRED fetcher
+# ======================================================
+fred_api_key = os.getenv("FRED_API_KEY")
+fred = Fred(api_key=fred_api_key)
+
+def fetch_fred_series(ticker: str) -> pd.DataFrame:
+    s = fred.get_series(ticker)
+    df = s.to_frame("value")
+    df.index.name = "date"
     return df
 
-
-def fetch_yahoo_series(ticker):
-    df = yf.download(ticker, start="1990-01-01", auto_adjust=True, progress=False)
+# ======================================================
+# Yahoo fetcher
+# ======================================================
+def fetch_yahoo_series(ticker: str) -> pd.DataFrame:
+    df = yf.download(ticker, progress=False)
 
     if df.empty:
-        raise ValueError(f"No data from Yahoo for {ticker}")
+        raise ValueError(f"Yahoo returned no data for {ticker}")
 
-    col = None
-    for c in ["Adj Close", "Close", "Price"]:
-        if c in df.columns:
-            col = c
-            break
+    # Clean price column
+    if "Adj Close" in df.columns:
+        df = df[["Adj Close"]].rename(columns={"Adj Close": "value"})
+    else:
+        df = df[["Close"]].rename(columns={"Close": "value"})
 
-    if not col:
-        raise ValueError(f"No usable price column from Yahoo for {ticker}")
-
-    df = df[[col]].rename(columns={col: "value"})
     df.index.name = "date"
-    df = df.dropna()
+    df = df[~df.index.duplicated(keep="last")]
     return df
 
-# ------------------------------------------------------------
+# ======================================================
 # Main loader
-# ------------------------------------------------------------
+# ======================================================
 def load_all_metrics():
     registry = load_registry()
-    print(f"\n🚀 Loading {len(registry)} metrics...\n")
+
+    print("\n🚀 Starting full VCF data load...\n")
 
     for metric_id, meta in registry.items():
         src = meta["source"].upper()
         ticker = meta["ticker"]
-        out_path = DATA_RAW / f"{metric_id}.csv"
 
-        print(f"📡 {metric_id} → {src} ({ticker})")
+        print(f"📡 Fetching {metric_id}: {meta['display_name']} ({src})")
 
         if src == "FRED":
             df = fetch_fred_series(ticker)
         elif src == "YAHOO":
             df = fetch_yahoo_series(ticker)
         else:
-            print(f"⚠ Unsupported source {src} — skipping")
+            print(f"⚠ Unsupported source '{src}', skipping…")
             continue
 
-        df.to_csv(out_path)
-        print(f"✔ Saved {len(df)} rows to {out_path}")
+        out_path = DATA_RAW / f"{metric_id}.csv"
 
-    print("\n🎉 Data loading complete!")
+        # 🚨 THE FIX — always write a clean date column
+        df.reset_index().rename(columns={"index": "date"}).to_csv(out_path, index=False)
 
+        print(f"✔ Saved → {out_path} ({len(df)} rows)\n")
 
-# ------------------------------------------------------------
-# Entrypoint
-# ------------------------------------------------------------
+# ======================================================
+# Execute script
+# ======================================================
 if __name__ == "__main__":
     load_all_metrics()
