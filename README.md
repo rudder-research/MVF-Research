@@ -94,12 +94,10 @@ Every time new data is pushed, GitHub automatically recalculates all geometry ou
 This makes the framework fully automated and fully reproducible.
 
 ----------------------------------------------------------
-
 **📊 Motivation**
 
 >VCF Research explores a simple but powerful idea:
 >Markets and macroeconomies generate signals that behave like vectors — having magnitude, direction, and relationships that can align or conflict over time.
-
 ----------------------------------------------------------
 
 **We study:**
