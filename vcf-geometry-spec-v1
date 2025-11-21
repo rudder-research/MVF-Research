@@ -1,0 +1,408 @@
+VCF Geometry Engine — Mathematical Specification v1.0
+1. Purpose
+
+This document defines the mathematical backbone for VCF Geometry Engine v1.0, establishing a stable, reproducible framework for preprocessing, normalizing, vectorizing, and interpreting macro-financial data using geometric methods.
+This is the foundational spec for Claude, GitHub Copilot, and all future code contributors.
+
+2. Raw Data Structure
+
+Each month 
+𝑡
+t, the system observes a normalized economic state vector:
+
+𝑥
+raw
+(
+𝑡
+)
+=
+[
+𝑥
+1
+(
+𝑡
+)
+,
+𝑥
+2
+(
+𝑡
+)
+,
+…
+,
+𝑥
+7
+(
+𝑡
+)
+]
+𝑇
+x
+raw
+	​
+
+(t)=[x
+1
+	​
+
+(t),x
+2
+	​
+
+(t),…,x
+7
+	​
+
+(t)]
+T
+
+Current baseline metrics:
+
+Index	Metric	Description
+1	GDP	Real US GDP (monthly interpolated)
+2	CPI	Inflation indicator
+3	Unemployment	Labor softness indicator
+4	Yield Curve	10Y – 2Y spread
+5	S&P 500	Market trend & momentum
+6	VIX	Volatility / stress
+7	DXY	Dollar strength
+3. Normalization Framework
+
+To ensure numerical stability and cross-regime comparability, each metric 
+𝑖
+i is normalized:
+
+3.1 Rolling mean & standard deviation
+𝜇
+𝑖
+=
+mean
+(
+𝑥
+𝑖
+)
+,
+𝜎
+𝑖
+=
+std
+(
+𝑥
+𝑖
+)
+μ
+i
+	​
+
+=mean(x
+i
+	​
+
+),σ
+i
+	​
+
+=std(x
+i
+	​
+
+)
+3.2 Z-Score normalization
+𝑥
+𝑖
+norm
+(
+𝑡
+)
+=
+𝑥
+𝑖
+(
+𝑡
+)
+−
+𝜇
+𝑖
+𝜎
+𝑖
+x
+i
+norm
+	​
+
+(t)=
+σ
+i
+	​
+
+x
+i
+	​
+
+(t)−μ
+i
+	​
+
+	​
+
+3.3 Clipping
+𝑥
+𝑖
+clip
+(
+𝑡
+)
+=
+clip
+(
+𝑥
+𝑖
+norm
+(
+𝑡
+)
+,
+−
+3
+,
++
+3
+)
+x
+i
+clip
+	​
+
+(t)=clip(x
+i
+norm
+	​
+
+(t),−3,+3)
+
+All implementations must:
+
+Use float64 precision
+
+Avoid divide-by-zero
+
+Backfill missing data using nearest neighbor
+
+4. Vector Construction
+
+The normalized economic vector is:
+
+𝑣
+(
+𝑡
+)
+=
+[
+𝑥
+1
+clip
+(
+𝑡
+)
+,
+𝑥
+2
+clip
+(
+𝑡
+)
+,
+…
+,
+𝑥
+7
+clip
+(
+𝑡
+)
+]
+𝑇
+v(t)=[x
+1
+clip
+	​
+
+(t),x
+2
+clip
+	​
+
+(t),…,x
+7
+clip
+	​
+
+(t)]
+T
+
+This is the input into all geometry functions.
+
+5. Geometric Properties
+5.1 Magnitude (“Stress Energy”)
+∥
+𝑣
+(
+𝑡
+)
+∥
+=
+∑
+𝑖
+=
+1
+7
+(
+𝑥
+𝑖
+clip
+(
+𝑡
+)
+)
+2
+∥v(t)∥=
+i=1
+∑
+7
+	​
+
+(x
+i
+clip
+	​
+
+(t))
+2
+	​
+
+5.2 Pairwise Angles
+
+For any two metrics 
+𝑎
+a and 
+𝑏
+b:
+
+𝜃
+𝑎
+𝑏
+(
+𝑡
+)
+=
+arctan
+⁡
+(
+𝑥
+𝑎
+clip
+(
+𝑡
+)
+𝑥
+𝑏
+clip
+(
+𝑡
+)
+)
+θ
+ab
+	​
+
+(t)=arctan(
+x
+b
+clip
+	​
+
+(t)
+x
+a
+clip
+	​
+
+(t)
+	​
+
+)
+5.3 Macro Geometry Angles (Future Use)
+
+Θ (Theta): macro-cycle phase angle
+
+Φ (Phi): liquidity-momentum phase angle
+
+These will be defined once the full wave/oscillation model is integrated.
+
+6. Leading / Lagging Treatment
+
+VCF interprets metrics based on their temporal behavior:
+
+Leading: Yield curve, credit spreads, equities momentum
+
+Coincident: GDP, CPI
+
+Lagging: Unemployment
+
+The engine uses this for:
+
+Weighting
+
+Phase dampening
+
+Cycle prediction
+
+Stress indexing
+
+7. Numerical Stability Requirements
+
+To ensure consistent cross-regime behavior:
+
+Always use np.clip() on normalized values
+
+Use np.arctan2() instead of arctan() for angles
+
+Run checks for NaN or infinite values
+
+Use rolling windows for long-term metrics (e.g., CPI)
+
+8. Output Format
+
+The engine should output:
+
+date
+x1_norm
+x2_norm
+...
+x7_norm
+magnitude
+theta
+phi
+stress_index (future)
+
+9. Versioning
+
+This is v1.0, the first stable mathematical spec.
+Future spec versions will add:
+
+Harmonic resonance
+
+Curvature of economic trajectories
+
+Vector field divergence
+
+Liquidity harmonics
+
+MVSS integration
+
+10. Author
+
+Jason Rudder
+VCF Research Initiative
+Architect, VCF Geometry Engine v1.0
