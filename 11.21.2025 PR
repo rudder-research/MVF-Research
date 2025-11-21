@@ -1,0 +1,43 @@
+# 🚀 VCF Research – Pull Request
+
+## 📌 Overview  
+_Provide a concise description of what this PR does. What problem does it solve?_
+
+-  
+-  
+
+---
+
+## 🧠 Context  
+_Why is this change needed for VCF Research?  
+Reference issues, discussions, or analytical goals._
+
+-  
+-  
+
+---
+
+## 🔢 Changes Included  
+_Check all that apply:_
+
+- [ ] New analysis module  
+- [ ] Harmonic / frequency-domain functions  
+- [ ] Geometry / phase-space functions  
+- [ ] Data pipeline update  
+- [ ] Normalization or preprocessing changes  
+- [ ] Notebook additions  
+- [ ] Bug fix  
+- [ ] Refactor or cleanup  
+- [ ] Documentation update  
+- [ ] Visualization or dashboard changes  
+
+---
+
+## 🧪 Test Instructions  
+_Describe how to run or validate the changes._
+
+```bash
+# Example
+python scripts/data_loader.py
+python scripts/build_macro_panel.py
+python src/vcf/run_geometry.py
