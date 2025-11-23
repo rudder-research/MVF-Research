@@ -1,0 +1,354 @@
+# Drive Mirror .gitignore
+# Optimized for Colab + Google Drive sync
+# Last updated: 2024-11-21
+
+# =============================================================================
+# Jupyter Notebook
+# =============================================================================
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+*.ipynb_checkpoints
+
+# Jupyter Notebook metadata
+.ipynb
+
+# =============================================================================
+# Python
+# =============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# =============================================================================
+# Credentials & Secrets (CRITICAL)
+# =============================================================================
+# API Keys and tokens
+*_api_key.txt
+*_api_key.json
+*.pem
+*.key
+*.keystore
+
+# Credentials files
+credentials.json
+credentials.txt
+token.json
+token.txt
+.env
+.env.*
+!.env.example
+
+# Config with secrets
+config.json
+secrets.json
+secrets.yaml
+secrets.yml
+
+# Google Cloud credentials
+*-key.json
+service-account*.json
+
+# AWS credentials
+.aws/
+*.pem
+
+# =============================================================================
+# Large Files & Data (>10MB recommended, >100MB GitHub limit)
+# =============================================================================
+# Large data files
+*.hdf5
+*.h5
+*.pkl
+*.pickle
+*.parquet
+*.feather
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Large CSVs (adjust threshold as needed)
+# Uncomment to exclude all CSVs over a certain size
+# *_large.csv
+
+# Compressed archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# =============================================================================
+# Google Drive & Colab Specific
+# =============================================================================
+# Google Drive desktop sync
+.tmp.driveupload/
+.tmp.drivedownload/
+
+# Colab temp files
+/content/
+
+# Google Colab runtime
+colab_sample_data/
+
+# Drive sync conflicts
+*_conflict-*.ipynb
+* (1).ipynb
+* (2).ipynb
+*_copy.ipynb
+
+# =============================================================================
+# Microsoft Office & Temporary Files
+# =============================================================================
+# Excel temporary files
+~$*.xls*
+~$*.xlsx
+~$*.xlsm
+
+# Word temporary files
+~$*.doc*
+~$*.docx
+
+# PowerPoint temporary files
+~$*.ppt*
+~$*.pptx
+
+# OneNote files
+*.tmp
+
+# General temporary files
+*.bak
+*.swp
+*.swo
+*~
+.DS_Store
+
+# =============================================================================
+# Operating System Files
+# =============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+
+# =============================================================================
+# IDE & Editors
+# =============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# =============================================================================
+# Logs & Debugging
+# =============================================================================
+*.log
+logs/
+*.out
+*.err
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =============================================================================
+# Model Checkpoints & Training Artifacts
+# =============================================================================
+# TensorFlow
+*.pb
+saved_model/
+checkpoint/
+*.ckpt
+*.ckpt.*
+
+# PyTorch
+*.pth
+*.pt
+*.bin
+
+# Model weights (large files)
+*.weights
+*.h5
+model_weights/
+
+# Training logs
+tensorboard/
+wandb/
+mlruns/
+
+# =============================================================================
+# Data & Research Specific
+# =============================================================================
+# Raw data folders (if very large)
+# Uncomment if you want to exclude:
+# data/raw/*
+# !data/raw/.gitkeep
+
+# Processed data that can be regenerated
+# data/interim/*
+# !data/interim/.gitkeep
+
+# Figures and plots (if regeneratable)
+# visuals/plots/*
+# !visuals/plots/.gitkeep
+
+# =============================================================================
+# Documentation Build Artifacts
+# =============================================================================
+_build/
+docs/_build/
+site/
+
+# Sphinx
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# =============================================================================
+# Version Control
+# =============================================================================
+# Git merge files
+*.orig
+
+# SVN
+.svn/
+
+# =============================================================================
+# Package Managers
+# =============================================================================
+# npm
+node_modules/
+package-lock.json
+
+# Conda
+*.conda
+*.tar.bz2
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+# Archived files
+archive/
+old/
+backup/
+
+# Test output
+test_output/
+tmp/
+temp/
+
+# Cache directories
+.cache/
+*.cache
+
+# =============================================================================
+# Project-Specific Exclusions
+# =============================================================================
+# Add custom exclusions below:
+
+# Example: Exclude specific large datasets
+# data/large_dataset.csv
+
+# Example: Exclude proprietary data
+# data/proprietary/*
+
+# Example: Exclude experimental notebooks
+# notebooks/experiments/*
+
+# =============================================================================
+# IMPORTANT: Files to ALWAYS Review Before Committing
+# =============================================================================
+# Even with .gitignore, always manually check:
+# 1. API keys in code or config files
+# 2. Passwords or tokens in notebooks
+# 3. PII (Personally Identifiable Information)
+# 4. Proprietary data or trade secrets
+# 5. Large files that slipped through
+# =============================================================================
