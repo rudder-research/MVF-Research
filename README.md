@@ -36,35 +36,64 @@ and whether this structure reveals stable, measurable patterns.
 
 ----------------------------------------------------------------------
 
-**🏗 Project Architecture***
+**🏗 Project Architecture**
 
+```
 VCF_Research/
 │
-├── registry/                # Metric definitions (JSON, CSV)
-├── data_raw/                # Unprocessed market + macro data (Colab writes)
-├── data_clean/              # Normalized series (Colab writes)
-├── panels/                  # Combined macro panels (Colab writes)
+├── notebooks/               # Jupyter notebooks for research and analysis
+│   ├── VFC_Mathematical_Engine_Claud.ipynb
+│   ├── Visualization_Suite_Claud.ipynb
+│   └── README.md
 │
-├── geometry/                # GitHub-run analysis engine (θ, φ, coherence)
-│   ├── compute_theta.py
-│   ├── compute_phi.py
-│   ├── coherence_engine.py
-│   └── stress_blocks.py
-│
-├── outputs/                 # Auto-generated results from GitHub Actions
-│   ├── theta.csv
-│   ├── phi.csv
-│   ├── coherence.csv
-│   └── diagnostics/
+├── src/                     # Reusable Python modules and libraries
+│   ├── vcf_advanced_math.py
+│   ├── vcf_visualizations.py
+│   └── README.md
 │
 ├── scripts/                 # ETL, normalization, panel construction
 │   ├── data_loader.py
-│   ├── data_normalizer.py
+│   ├── normalize_metrics.py
 │   ├── build_macro_panel.py
-│   └── utilities.py
+│   ├── geometry_engine.py
+│   └── README.md
 │
-└── .github/workflows/
-    └── run_geometry.yml     # CI/CD pipeline to compute geometry on push
+├── data_raw/                # Unprocessed market + macro data (Colab writes)
+│   ├── SPY_US.csv
+│   ├── GDP_US.csv
+│   ├── CPI_US.csv
+│   └── README.md
+│
+├── data_clean/              # Normalized series (Colab writes)
+│   ├── *_normalized.csv
+│   ├── macro_monthly_panel.csv
+│   └── README.md
+│
+├── geometry/                # GitHub-run analysis engine (θ, φ, coherence)
+│   ├── geometry_panel.csv
+│   └── README.md
+│
+├── registry/                # Metric definitions (JSON, CSV)
+│   ├── vcf_metric_registry.json
+│   ├── metrics.csv
+│   └── README.md
+│
+├── docs/                    # Project documentation
+│   ├── DATA_SOURCES.md      # Data source and preprocessing information
+│   ├── log.md               # Experiment and process notes
+│   └── *.md                 # Additional research documentation
+│
+├── assets/                  # Static files, archives, and references
+│   ├── *.zip
+│   ├── *.pdf
+│   └── *.gdoc
+│
+├── .github/workflows/       # CI/CD automation
+│   └── run_geometry.yml
+│
+├── .gitignore               # Exclude large files and build artifacts
+└── README.md                # This file
+```
 
 
 ----------------------------------------------------------
@@ -135,6 +164,37 @@ The focus is structural understanding, not prediction.
 
 No local installation required.
 
+
+----------------------------------------------------------
+
+**📝 Workflow & How to Use**
+
+**Running Notebooks:**
+1. Open notebooks in Google Colab or Jupyter
+2. Notebooks in `/notebooks` directory contain research and analysis code
+3. For Colab integration with Google Drive:
+   - Mount your Google Drive
+   - Clone this repository or sync files
+   - See `/docs/Colab_Zip_Builder.md` for detailed instructions
+
+**Running Scripts:**
+1. Scripts in `/scripts` handle data loading, normalization, and panel construction
+2. Run locally with Python 3.10+ or in Colab environment
+3. See individual script files for usage and parameters
+
+**Data Organization:**
+- **Raw data**: Place unprocessed CSV files in `/data_raw/`
+- **Clean data**: Normalized and processed data outputs go to `/data_clean/`
+- **Data sources**: Document all data sources in `/docs/DATA_SOURCES.md`
+- **Updates**: When adding new data, update both the raw files and documentation
+
+**Collaboration:**
+- Use `/docs/log.md` to track experiments, findings, and process notes
+- Document code changes clearly in commit messages
+- Store reusable functions in `/src/` for use across notebooks and scripts
+- Keep notebooks focused on specific analyses or workflows
+
+For more detailed information, see documentation in `/docs/` directory.
 
 ----------------------------------------------------------
 
