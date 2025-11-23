@@ -1,6 +1,6 @@
 # 🧠 Claude Research Index — VCF-RESEARCH
 
-This index consolidates all Claude-generated and related documentation packages used in the **Vector Coherence Framework (VCF)** project.  
+This index consolidates  all Claude-generated and related documentation packages used in the **Vector Coherence Framework (VCF)** project.  
 It provides a single point of reference for drafts, notebooks, and zip archives.
 
 ---
