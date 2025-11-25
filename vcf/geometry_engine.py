@@ -3,12 +3,27 @@ import json
 import numpy as np
 import pandas as pd
 
-# ---------- Paths ----------
+# ---------- Constants (safe at import time) ----------
 BASE_DIR = r"C:\Users\rudde\VCF_Research"
 REGISTRY_PATH = os.path.join(BASE_DIR, "registry", "vcf_metric_registry.json")
 PANEL_PATH = os.path.join(BASE_DIR, "data_clean", "normalized_panel.csv")
 OUT_DIR = os.path.join(BASE_DIR, "geometry")
-os.makedirs(OUT_DIR, exist_ok=True)
+
+# Do NOT load files or create directories on module import.
+
+
+# ---------- Script Mode Only ----------
+if __name__ == "__main__":
+    # Only run when executing this file directly, not when importing it.
+    os.makedirs(OUT_DIR, exist_ok=True)
+    
+    print("\n🧮 Starting VCF geometry engine (Option C: long + full)...")
+    
+    if not os.path.exists(PANEL_PATH):
+        print(f"⚠️ Normalized panel not found at: {PANEL_PATH}")
+    else:
+        print("📁 Panel found — ready to process geometric state space.")
+
 
 print("\n🧮 Starting VCF geometry engine (Option C: long + full)...")
 
