@@ -1,8 +1,0 @@
-# Pull Request Request: Repository Reorganization + Scaffolding Setup (VCF-RESEARCH)
-
-Author: Jason Rudder
-Request prepared by: ChatGPT
-
-Purpose: Establish a clean research-grade architecture for the VCF Project and prepare scaffolding for geometry engine code.
-
-(Full content will be inserted by ChatGPT in next revision.)
