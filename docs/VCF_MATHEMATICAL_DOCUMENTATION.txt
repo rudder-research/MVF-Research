@@ -1,0 +1,596 @@
+"""
+Vector Coherence Framework (VCF)
+Mathematical Documentation
+==================================
+
+Author: Jason Rudder
+Date: November 2024
+Version: 1.0
+
+Academic Context
+----------------
+This framework represents a novel approach to analyzing financial market dynamics
+through geometric and harmonic analysis rather than traditional economic assumptions.
+The core insight is treating financial data as pure mathematical signals to discover
+patterns and relationships first, then overlaying economic interpretation.
+
+This document provides complete mathematical justification for all VCF methodologies,
+suitable for academic review and publication.
+
+═══════════════════════════════════════════════════════════════════════════════
+PART I: THEORETICAL FOUNDATION
+═══════════════════════════════════════════════════════════════════════════════
+
+1. MOTIVATION: THE NORMALIZATION PROBLEM
+-----------------------------------------
+
+Traditional Approach (Z-Score):
+    z_i(t) = (x_i(t) - μ_i) / σ_i
+
+Problem: This assumes all series have comparable statistical properties.
+
+Reality: Financial data contains TWO fundamentally different types:
+
+    Type A - OSCILLATING (yields, ratios, volatility):
+        • Bounded
+        • Mean-reverting
+        • Stationary or near-stationary
+        • Example: 10Y Treasury yield oscillates around 3-5%
+
+    Type B - TRENDING (prices, indices):
+        • Unbounded
+        • Non-stationary
+        • Exhibits drift
+        • Example: S&P 500 grows from 1000 → 4000
+
+When Type A and Type B are z-score normalized together:
+    → Trending data dominates geometric calculations
+    → Magnitude becomes primarily driven by price trends
+    → Genuine oscillatory structure is obscured
+    → Coherence analysis becomes biased
+
+This is not a data problem. It's a fundamental mathematical problem requiring
+a fundamental mathematical solution.
+
+
+2. SOLUTION: DUAL-INPUT ARCHITECTURE
+-------------------------------------
+
+Core Insight: Every market signal contains TWO pieces of information:
+    1. POSITION: Where are we relative to trend?
+    2. MOMENTUM: How fast are we changing?
+
+Mathematical Formulation:
+    For signal x(t), extract:
+        Position(t) = x(t) / MA(x, window)
+        Momentum(t) = [x(t) - x(t-k)] / x(t-k)
+
+Properties of this transformation:
+
+A. POSITION preserves geometric structure:
+    • Ratio to moving average removes trend
+    • Oscillates around 1.0 for both trending and oscillating data
+    • Captures "deviation from normal"
+    • Scale-independent
+
+B. MOMENTUM captures dynamics:
+    • Rate of change independent of absolute level
+    • Captures velocity in phase space
+    • Sensitive to acceleration/deceleration
+    • Complements position information
+
+C. Combined representation forms phase space:
+    State vector: X(t) = [pos₁(t), mom₁(t), pos₂(t), mom₂(t), ..., posₙ(t), momₙ(t)]ᵀ
+    Dimension: 2N where N = number of market sources
+
+This is analogous to Hamiltonian mechanics where we need both position q and
+momentum p to fully specify a system's state.
+
+Academic Justification:
+    • Takens' Embedding Theorem (1981): Phase space reconstruction from time series
+    • Differential Geometry: Tangent bundle TM = M × TₚM (manifold + tangent space)
+    • Control Theory: State space models require both state and derivative
+
+
+3. HARMONIC NORMALIZATION
+--------------------------
+
+Alternative approach: Normalize in frequency domain before applying z-score.
+
+Mathematical Framework:
+Any signal can be decomposed via Fourier transform:
+    x(t) = a₀ + Σ[aₖcos(2πfₖt) + bₖsin(2πfₖt)]
+
+Decomposition into components:
+    x(t) = x_trend(t) + x_cycle(t) + x_noise(t)
+
+Where:
+    • x_trend: Low frequency components (f < f_threshold)
+    • x_cycle: Mid-frequency components (dominant harmonics)
+    • x_noise: High frequency components (removed)
+
+Normalization via harmonic position:
+    Harmonic_Position(t) = x_cycle(t) / x_trend(t)
+
+Properties:
+    • Oscillates around zero
+    • Independent of absolute scale
+    • Preserves phase relationships
+    • Suitable for coherence analysis
+
+This approach discovers natural oscillatory structure BEFORE normalization,
+rather than imposing statistical assumptions.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART II: COHERENCE THEORY
+═══════════════════════════════════════════════════════════════════════════════
+
+4. PHASE SYNCHRONIZATION
+-------------------------
+
+Hilbert Transform and Instantaneous Phase:
+
+For real-valued signal x(t), the analytic signal is:
+    z(t) = x(t) + iH[x(t)]
+
+where H[x] is the Hilbert transform:
+    H[x](t) = (1/π) ∫₋∞^∞ x(τ)/(t-τ) dτ
+
+Instantaneous phase:
+    φ(t) = arg(z(t)) = arctan(H[x](t) / x(t))
+
+Instantaneous amplitude:
+    A(t) = |z(t)| = √(x²(t) + H[x]²(t))
+
+Physical Interpretation:
+The Hilbert transform represents the signal as a rotating phasor in complex plane.
+Phase φ(t) captures the "angle" of oscillation independent of amplitude.
+
+
+5. PHASE LOCKING VALUE (PLV)
+-----------------------------
+
+Definition:
+For two signals with phases φ₁(t) and φ₂(t):
+    PLV = |⟨exp(i·Δφ(t))⟩|
+
+where:
+    • Δφ(t) = φ₁(t) - φ₂(t) is phase difference
+    • ⟨·⟩ denotes time average
+    • |·| is complex magnitude
+
+Mathematical Properties:
+    • 0 ≤ PLV ≤ 1
+    • PLV = 1: Perfect phase locking (constant Δφ)
+    • PLV = 0: Random phase relationship
+    • PLV is invariant to amplitude scaling
+
+Advantages over correlation:
+    • Detects nonlinear relationships
+    • Insensitive to amplitude fluctuations
+    • Captures synchronization even without correlation
+    • More robust to outliers
+
+Academic References:
+    • Lachaux et al. (1999) "Measuring Phase Synchrony in Brain Signals"
+    • Rosenblum et al. (1996) "Phase Synchronization of Chaotic Oscillators"
+
+
+6. KURAMOTO ORDER PARAMETER
+----------------------------
+
+For N coupled oscillators with phases φₖ(t), k = 1,...,N:
+
+Order parameter:
+    R(t)·exp(iΨ(t)) = (1/N)Σₖexp(iφₖ(t))
+
+Magnitude:
+    R(t) = |1/N Σₖexp(iφₖ(t))|
+
+Properties:
+    • 0 ≤ R ≤ 1
+    • R = 1: All oscillators perfectly synchronized
+    • R = 0: Complete incoherence (uniform phase distribution)
+    • R measures "global synchronization"
+
+Kuramoto Model:
+    dφₖ/dt = ωₖ + (K/N)Σⱼsin(φⱼ - φₖ)
+
+where:
+    • ωₖ = natural frequency of oscillator k
+    • K = coupling strength
+    • At K > K_critical, spontaneous synchronization emerges
+
+Application to Markets:
+Each normalized market signal is treated as an oscillator.
+R(t) measures whether market is:
+    • R ≈ 1: Regime coherence (all moving together)
+    • R ≈ 0: Transition/fragmentation (independent dynamics)
+    • ∂R/∂t < 0: Approaching regime change
+
+Academic References:
+    • Kuramoto (1984) "Chemical Oscillations, Waves, and Turbulence"
+    • Strogatz (2000) "From Kuramoto to Crawford"
+
+
+7. SPECTRAL COHERENCE
+----------------------
+
+Cross-spectral density:
+    S_xy(f) = ⟨X*(f)Y(f)⟩
+
+where X(f), Y(f) are Fourier transforms.
+
+Coherence:
+    γ²(f) = |S_xy(f)|² / (S_xx(f)·S_yy(f))
+
+Properties:
+    • 0 ≤ γ²(f) ≤ 1 for each frequency f
+    • γ² = 1: Perfect linear relationship at frequency f
+    • γ² = 0: Independent at frequency f
+
+Interpretation for Markets:
+    • High γ² at low f: Long-term co-movement
+    • High γ² at high f: Short-term synchronization
+    • Frequency-dependent coupling reveals multi-scale relationships
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART III: GEOMETRIC ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+8. STATE SPACE GEOMETRY
+------------------------
+
+State Space: R^N where N = dimension of normalized state vector
+
+State Vector:
+    x(t) = [x₁(t), x₂(t), ..., xₙ(t)]ᵀ ∈ R^N
+
+Geometric Quantities:
+
+A. MAGNITUDE (Distance from Origin):
+    ||x(t)|| = √(Σᵢxᵢ²(t))
+
+    Interpretation: "Market stress" or "distance from equilibrium"
+    • High ||x||: Extreme market state
+    • Low ||x||: Market near historical norms
+
+B. DIRECTION (Unit Vector):
+    x̂(t) = x(t) / ||x(t)||
+
+    Interpretation: "Regime orientation"
+    • Direction characterizes the type of market state
+    • Similar directions → similar regimes
+
+C. ANGULAR ROTATION:
+    θ(t) = arccos((x(t-1)·x(t)) / (||x(t-1)||·||x(t)||))
+
+    Interpretation: "Regime change rate"
+    • Small θ: Stable regime
+    • Large θ: Rapid transition
+    • θ ≈ π: Complete reversal
+
+D. VELOCITY (First Derivative):
+    v(t) = dx/dt ≈ (x(t) - x(t-1)) / Δt
+
+    Interpretation: "Rate of regime change"
+    • High ||v||: Rapid evolution
+    • Direction of v: Where market is heading
+
+E. DIVERGENCE FROM MEAN:
+    μ = ⟨x(t)⟩_t (time-averaged state)
+    Divergence(t) = arccos((x(t)·μ) / (||x(t)||·||μ||))
+
+    Interpretation: "Distance from historical center"
+    • High divergence: Unusual/extreme state
+    • Often precedes mean reversion
+
+
+9. MANIFOLD STRUCTURE
+----------------------
+
+Hypothesis: Market states lie on a lower-dimensional manifold M ⊂ R^N
+
+Evidence:
+    • Financial data has dependencies (not truly N-dimensional)
+    • Regime clustering suggests lower-dimensional attractor
+    • Successful PCA dimensionality reduction
+
+Principal Component Analysis:
+    Find orthogonal directions of maximum variance:
+    x(t) ≈ Σₖaₖ(t)vₖ
+
+where:
+    • vₖ are principal components (eigenvectors of covariance)
+    • aₖ(t) are projections (reduced coordinates)
+    • Typically first 3-5 PCs capture 70-90% of variance
+
+Intrinsic Dimensionality:
+The "true" dimension of market dynamics may be much lower than N.
+This justifies regime classification: market occupies distinct regions of
+lower-dimensional manifold.
+
+Manifold Curvature:
+    κ ∝ ||dv/dt|| / ||v||²
+
+High curvature indicates nonlinear dynamics and potential regime boundaries.
+
+
+10. REGIME CLASSIFICATION
+--------------------------
+
+Regime = Distinct region of state space with characteristic dynamics
+
+Classification Scheme Based on Geometric Quantities:
+
+EQUILIBRIUM:
+    • Low magnitude: ||x|| < threshold_low
+    • Low rotation: θ < threshold_low
+    • Low divergence: div < threshold_low
+    → Market stable and near historical norms
+
+TRENDING:
+    • High velocity: ||v|| > threshold_high
+    • Low rotation: θ < threshold_low
+    → Strong directional movement, smooth trajectory
+
+TRANSITION:
+    • High rotation: θ > threshold_high
+    → Regime change in progress, direction shifting rapidly
+
+STRESS:
+    • High magnitude: ||x|| > threshold_high
+    • High divergence: div > threshold_high
+    → Market in extreme state, far from norms
+
+CRISIS:
+    • High magnitude: ||x|| > threshold_high
+    • High rotation: θ > threshold_high
+    • High divergence: div > threshold_high
+    → Severe dislocation, all metrics extreme
+
+RECOVERY:
+    • Decreasing magnitude: ∂||x||/∂t < 0
+    • Previous magnitude was high
+    → Returning from extreme state
+
+Mathematical Justification:
+This classification uses multiple independent geometric dimensions to
+partition state space. It's analogous to phase portraits in dynamical
+systems theory, where regions are classified by qualitatively different
+behaviors.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART IV: IMPLEMENTATION CONSIDERATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+11. EDGE CASES AND ROBUSTNESS
+------------------------------
+
+A. ZERO OR NEAR-ZERO VALUES:
+    Problem: Division by zero in ratio calculations
+    Solution: Replace zeros with small constant (e.g., 1e-10)
+
+B. INFINITE PERCENTAGE CHANGES:
+    Problem: x(t-1) = 0 → infinite momentum
+    Solution: Cap or replace infinite values with NaN, then interpolate
+
+C. MISSING DATA:
+    Problem: Real financial data has gaps
+    Solution: Forward-fill then back-fill, but reject if >30% missing
+
+D. INSUFFICIENT HISTORY:
+    Problem: Moving average undefined at start
+    Solution: Use expanding window for initial periods
+
+E. NUMERICAL PRECISION:
+    Problem: arccos(x) requires x ∈ [-1,1]
+    Solution: Clip values before arccos: x = np.clip(x, -1, 1)
+
+F. OUTLIERS:
+    Problem: Single extreme values can distort analysis
+    Solution: Robust z-score using median and MAD instead of mean/std
+
+
+12. COMPUTATIONAL COMPLEXITY
+-----------------------------
+
+Let:
+    N = number of signals
+    T = number of time points
+
+Operations:
+    • Normalization: O(NT) per signal → O(N²T) total
+    • Coherence matrix: O(N²T) (pairwise comparisons)
+    • Kuramoto order: O(NT) per time point → O(T·N)
+    • Geometric metrics: O(NT) per metric
+    • Regime classification: O(T)
+
+Total Complexity: O(N²T)
+
+For typical applications:
+    • N ~ 8-20 signals
+    • T ~ 100-500 time points
+    • Total operations ~ 10⁶-10⁷ (fast on modern hardware)
+
+
+13. PARAMETER SELECTION
+------------------------
+
+Critical Parameters and Guidance:
+
+A. Moving Average Window (ma_window):
+    • Monthly data: 12 months (captures annual cycle)
+    • Daily data: 252 days (one trading year)
+    • Principle: Should be ~1 cycle of dominant frequency
+
+B. Rate of Change Window (roc_window):
+    • Usually 1 period (month or day)
+    • Captures immediate momentum
+    • Larger values smooth but add lag
+
+C. Coherence Window:
+    • For rolling PLV: 24 months minimum
+    • Shorter → more responsive, more noise
+    • Longer → more stable, less responsive
+
+D. Regime Thresholds:
+    • Use quantiles (33rd/67th percentile) rather than fixed values
+    • Adapts to data characteristics
+    • Makes classification data-driven
+
+Academic Recommendation: Document sensitivity analysis showing results
+are robust to reasonable parameter variations (e.g., ±20% changes).
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PART V: INTERPRETATION AND APPLICATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+14. WHAT VCF REVEALS
+--------------------
+
+VCF is NOT:
+    • A forecasting model
+    • A trading system
+    • An economic theory
+
+VCF IS:
+    • A descriptive framework for market structure
+    • A tool for regime identification
+    • A method to quantify synchronization
+    • A geometric representation of market dynamics
+
+Key Questions VCF Answers:
+    1. Are markets currently synchronized or fragmenting?
+    2. Is the market in a stable regime or transitioning?
+    3. How extreme is the current market state?
+    4. Which market signals move together (and at what timescales)?
+    5. What is the geometric signature of different regimes?
+
+
+15. POTENTIAL RESEARCH DIRECTIONS
+----------------------------------
+
+A. REGIME PREDICTION:
+    Can geometric indicators (rising rotation, falling coherence)
+    predict regime changes before they occur?
+
+B. CRISIS WARNING SYSTEM:
+    Do specific patterns in coherence + geometry precede crises?
+    Historical analysis of 2008, COVID-19, etc.
+
+C. FREQUENCY DECOMPOSITION:
+    Separate high-frequency (tactical) vs low-frequency (strategic)
+    regime changes using wavelet analysis
+
+D. NETWORK ANALYSIS:
+    Construct time-varying networks from coherence matrix
+    Study network topology changes during regimes
+
+E. CROSS-MARKET CONTAGION:
+    Apply VCF to multiple markets simultaneously
+    Detect how regime changes propagate across markets
+
+F. ECONOMIC INTERPRETATION:
+    Once geometric regimes are identified, overlay economic
+    narratives to understand what drives each regime
+
+
+═══════════════════════════════════════════════════════════════════════════════
+APPENDIX: MATHEMATICAL NOTATION REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+SCALARS (lowercase):
+    t - time
+    N - number of signals
+    T - number of time points
+    θ - angle
+    φ - phase
+    f - frequency
+    R - Kuramoto order parameter
+    κ - curvature
+
+VECTORS (bold lowercase):
+    x - state vector
+    v - velocity vector
+    μ - mean vector
+
+MATRICES (bold uppercase):
+    X - state matrix (T × N)
+    C - coherence matrix (N × N)
+
+OPERATORS:
+    ||·|| - Euclidean norm (magnitude)
+    ⟨·⟩ - time average
+    · - dot product
+    ∇ - gradient
+    ∂/∂t - partial derivative with respect to time
+
+TRANSFORMS:
+    H[·] - Hilbert transform
+    F[·] - Fourier transform
+
+SPECIAL FUNCTIONS:
+    exp() - exponential
+    arccos() - inverse cosine
+    arg() - argument (angle) of complex number
+    |·| - absolute value / complex magnitude
+
+
+═══════════════════════════════════════════════════════════════════════════════
+REFERENCES
+═══════════════════════════════════════════════════════════════════════════════
+
+Phase Synchronization:
+• Lachaux, J. P., et al. (1999). "Measuring phase synchrony in brain signals."
+  Human Brain Mapping, 8(4), 194-208.
+
+• Rosenblum, M. G., Pikovsky, A. S., & Kurths, J. (1996). "Phase synchronization
+  of chaotic oscillators." Physical Review Letters, 76(11), 1804.
+
+Kuramoto Model:
+• Kuramoto, Y. (1984). Chemical Oscillations, Waves, and Turbulence.
+  Springer-Verlag.
+
+• Strogatz, S. H. (2000). "From Kuramoto to Crawford: exploring the onset of
+  synchronization in populations of coupled oscillators." Physica D, 143, 1-20.
+
+Dynamical Systems:
+• Takens, F. (1981). "Detecting strange attractors in turbulence."
+  Lecture Notes in Mathematics, 898, 366-381.
+
+• Ott, E., Sauer, T., & Yorke, J. A. (1994). Coping with Chaos.
+  John Wiley & Sons.
+
+Signal Processing:
+• Boashash, B. (1992). "Estimating and interpreting the instantaneous frequency
+  of a signal." Proceedings of the IEEE, 80(4), 520-538.
+
+Financial Applications:
+• Mantegna, R. N., & Stanley, H. E. (2000). An Introduction to Econophysics.
+  Cambridge University Press.
+
+• Bouchaud, J. P., & Potters, M. (2003). Theory of Financial Risk and Derivative
+  Pricing. Cambridge University Press.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF MATHEMATICAL DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+This documentation provides complete mathematical foundation for VCF.
+All methods are justified from first principles with academic citations.
+
+For implementation details, see the Python modules:
+    • vcf_normalization.py
+    • vcf_coherence.py
+    • vcf_geometry.py
+    • vcf_main.py
+
+Jason Rudder
+November 2024
+"""
