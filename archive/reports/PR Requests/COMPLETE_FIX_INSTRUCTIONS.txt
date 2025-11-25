@@ -1,0 +1,219 @@
+DRIVE MIRROR SYNC - FIXED VERSION (Branch-Agnostic)
+====================================================
+
+This is the FIXED version that handles any branch name.
+Replace your Cell 7 with the version below.
+
+================================================================================
+QUICK FIX - RUN THIS IN A NEW CELL RIGHT NOW
+================================================================================
+
+To fix your current error immediately, run this in a new cell:
+
+# Quick fix for branch issue
+repo = git.Repo(LOCAL_REPO_PATH)
+current_branch = repo.active_branch.name
+print(f"Current branch: {current_branch}")
+
+# Push with upstream tracking
+origin = repo.remote('origin')
+push_info = origin.push(current_branch, set_upstream=True)
+
+if push_info and push_info[0].flags & git.remote.PushInfo.ERROR:
+    print("❌ Push failed:", push_info[0].summary)
+else:
+    print("✅ Push successful!")
+    print(f"View: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}/tree/{current_branch}")
+
+================================================================================
+COMPLETE FIXED CELL 7 FOR FUTURE USE
+================================================================================
+
+Replace your Cell 7 with this improved version:
+
+---
+
+## 7️⃣ Commit & Push Changes
+
+---
+
+if HAS_CHANGES:
+    print("📤 Committing and pushing changes...\n")
+    
+    # Stage all changes
+    repo.git.add(A=True)
+    print("✅ Changes staged")
+    
+    # Create commit message
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    commit_message = f"""Sync from Google Drive - {timestamp}
+
+Changes:
+- New files: {len(new_files)}
+- Modified files: {len(modified_files)}
+- Deleted files: {len(deleted_files)}
+- Total changes: {total_changes}
+
+Source: /MyDrive/VCF-RESEARCH
+Synced by: Drive Mirror Bot (Colab)
+"""
+    
+    # Commit changes
+    repo.index.commit(commit_message)
+    print("✅ Changes committed")
+    
+    # Get current branch
+    current_branch = repo.active_branch.name
+    print(f"\n📋 Current branch: {current_branch}")
+    
+    # Check if we should switch to main
+    if current_branch != GITHUB_BRANCH:
+        print(f"\n⚠️  Warning: Repository is on '{current_branch}', not '{GITHUB_BRANCH}'")
+        print(f"   Syncing to current branch '{current_branch}'")
+        print(f"   (To sync to main instead, checkout main branch first)")
+    
+    # Push to GitHub
+    print(f"\n📤 Pushing to GitHub ({current_branch})...")
+    try:
+        origin = repo.remote('origin')
+        
+        # Push current branch with upstream tracking
+        push_info = origin.push(current_branch, set_upstream=True)
+        
+        # Check push result
+        if push_info and push_info[0].flags & git.remote.PushInfo.ERROR:
+            print("❌ Push failed")
+            print(f"   Error: {push_info[0].summary}")
+        else:
+            print("✅ Push successful")
+            print(f"\n🎉 Sync complete!")
+            print(f"   Repository: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}")
+            print(f"   Branch: {current_branch}")
+            if current_branch != GITHUB_BRANCH:
+                print(f"\n📝 Note: Changes pushed to '{current_branch}' branch")
+                print(f"   Main branch is: {GITHUB_BRANCH}")
+    
+    except git.exc.GitCommandError as e:
+        print("❌ Push failed")
+        print(f"   Error: {str(e)}")
+        print("\n📝 Troubleshooting:")
+        print("   1. Verify token has 'repo' scope")
+        print("   2. Check you have write access")
+        print("   3. Confirm repository exists")
+        raise
+
+else:
+    print("\n✅ No changes to commit - repository is up to date")
+
+================================================================================
+ALTERNATIVE: AUTO-SWITCH TO MAIN BRANCH
+================================================================================
+
+If you want to ALWAYS sync to main regardless of current branch,
+use this version of Cell 7 instead:
+
+---
+
+if HAS_CHANGES:
+    print("📤 Committing and pushing changes...\n")
+    
+    repo.git.add(A=True)
+    print("✅ Changes staged")
+    
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    commit_message = f"""Sync from Google Drive - {timestamp}
+
+Changes:
+- New files: {len(new_files)}
+- Modified files: {len(modified_files)}
+- Deleted files: {len(deleted_files)}
+- Total changes: {total_changes}
+
+Source: /MyDrive/VCF-RESEARCH
+Synced by: Drive Mirror Bot (Colab)
+"""
+    
+    repo.index.commit(commit_message)
+    print("✅ Changes committed")
+    
+    # Ensure we're on main branch
+    current_branch = repo.active_branch.name
+    if current_branch != GITHUB_BRANCH:
+        print(f"\n🔄 Switching from '{current_branch}' to '{GITHUB_BRANCH}'...")
+        try:
+            # Try to checkout main
+            repo.git.checkout(GITHUB_BRANCH)
+            print(f"✅ Switched to {GITHUB_BRANCH}")
+        except git.exc.GitCommandError:
+            # Main doesn't exist locally, create it tracking remote
+            print(f"⚠️  '{GITHUB_BRANCH}' doesn't exist locally, creating...")
+            repo.git.checkout('-b', GITHUB_BRANCH, f'origin/{GITHUB_BRANCH}')
+            print(f"✅ Created and switched to {GITHUB_BRANCH}")
+    
+    print(f"\n📤 Pushing to GitHub ({GITHUB_BRANCH})...")
+    try:
+        origin = repo.remote('origin')
+        push_info = origin.push(GITHUB_BRANCH, set_upstream=True)
+        
+        if push_info and push_info[0].flags & git.remote.PushInfo.ERROR:
+            print("❌ Push failed")
+            print(f"   Error: {push_info[0].summary}")
+        else:
+            print("✅ Push successful")
+            print(f"\n🎉 Sync complete!")
+            print(f"   View: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}")
+    
+    except git.exc.GitCommandError as e:
+        print("❌ Push failed")
+        print(f"   Error: {str(e)}")
+        raise
+
+else:
+    print("\n✅ No changes to commit")
+
+================================================================================
+WHAT CAUSED THE ERROR
+================================================================================
+
+The error happened because:
+
+1. Your repository was cloned on branch "vcf-geometry-spec-v1"
+2. The original script tried to push without specifying upstream
+3. Git didn't know where to push the branch
+
+The fix:
+✅ Detects current branch dynamically
+✅ Uses set_upstream=True to establish tracking
+✅ Works with ANY branch name
+✅ Provides clear feedback about which branch is being used
+
+================================================================================
+RECOMMENDATION
+================================================================================
+
+For a MIRROR repository, I recommend:
+
+1. Keep the repository on "main" branch only
+2. Use the "AUTO-SWITCH TO MAIN" version above
+3. This ensures all syncs go to the same place
+4. Makes the mirror more predictable
+
+To set this up:
+1. Update Cell 7 with "AUTO-SWITCH TO MAIN" version
+2. Re-run the sync
+3. All future syncs will go to main
+
+================================================================================
+TESTING THE FIX
+================================================================================
+
+To test right now without re-running everything:
+
+1. Add a new cell after your current Cell 7
+2. Paste the "QUICK FIX" code from the top of this file
+3. Run it
+4. It should push successfully
+
+Then for next time, update Cell 7 permanently.
+
+================================================================================
