@@ -179,25 +179,26 @@ class MultiFrequencyRegimeDetector:
     def _calculate_coherence(self, history: np.ndarray) -> float:
         """
         Calculate coherence across time series in history.
-        
+
         Uses phase-locking value across all pairs of dimensions.
         """
         n_dims = history.shape[1]
-        
+
         if n_dims < 2:
             return 1.0
-        
+
         # Calculate pairwise phase locking
         plv_values = []
-        
+
         for i in range(n_dims):
             for j in range(i + 1, n_dims):
-                plv = self.coherence.phase_locking_value(
-                    history[:, i], 
-                    history[:, j]
-                )
+                # Convert numpy arrays to pandas Series for coherence engine
+                series_i = pd.Series(history[:, i])
+                series_j = pd.Series(history[:, j])
+
+                plv = self.coherence.phase_locking_value(series_i, series_j)
                 plv_values.append(plv)
-        
+
         # Average coherence across all pairs
         return np.mean(plv_values)
     
