@@ -65,7 +65,15 @@ temp/
 *.log
 logs/
 
-# Large data archives (keep source CSVs for research transparency)
-# Add specific large files if needed
+# Raw data (stored in data-lake branch, not main)
+data_raw/
+
+# Archive files (stored in archive branch, not main)
+archive/
+
+# Large data archives
 # *.zip
 # *.tar.gz
+
+# Outputs (optional - uncomment if needed)
+# outputs/

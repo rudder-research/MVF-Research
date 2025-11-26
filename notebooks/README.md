@@ -1,12 +1,10 @@
-# Notebooks
+# notebooks/ — Exploratory / Experimental Work
 
-This directory contains Jupyter notebooks for research, analysis, and visualization of VCF (Vector Coherence Framework) data.
+## Subfolders
 
-## Contents
-
-- **VFC_Mathematical_Engine_Claud.ipynb**: Core mathematical engine for VCF calculations, including theta (θ), phi (φ), and coherence computations
-- **Visualization_Suite_Claud.ipynb**: Visualization tools and charts for analyzing VCF outputs
-- **Visualization_Suite_Copilot_Edit.ipynb**: Enhanced visualization suite with additional features
+- `exploration/` → rough early work, initial investigations
+- `experiments/` → structured testing and analysis
+- `deprecated/` → retired notebooks
 
 ## Usage
 
@@ -33,27 +31,9 @@ This directory contains Jupyter notebooks for research, analysis, and visualizat
    ```
 3. Navigate to the notebook and run
 
-## Dependencies
-
-Common dependencies used across notebooks:
-- pandas
-- numpy
-- matplotlib
-- scipy
-- yfinance (for market data)
-- pandas-datareader (for economic data)
-
 ## Integration with Repository
 
-- **Data Input**: Notebooks read from `/data_raw/` and `/data_clean/` directories
-- **Data Output**: Processed data should be written to `/data_clean/` or `/geometry/`
-- **Code Modules**: Import reusable functions from `/src/` directory
-- **Scripts**: Leverage scripts from `/scripts/` for data processing tasks
-
-## Best Practices
-
-- Keep notebooks focused on specific analyses or workflows
-- Document your analysis with markdown cells
-- Use clear variable names and add comments for complex operations
-- Save intermediate results to appropriate data directories
-- Track significant findings in `/docs/log.md`
+- **Data Input**: Notebooks read from `code/data_normalized/` directory
+- **Data Output**: Processed data should be written to `outputs/`
+- **Code Modules**: Import reusable functions from `code/math/` and `code/shared/`
+- **Pilots**: Use `pilots/` for structured math experiments
