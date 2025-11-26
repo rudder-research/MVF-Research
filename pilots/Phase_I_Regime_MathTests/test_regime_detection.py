@@ -28,7 +28,7 @@ sys.path.insert(0, str(code_path / 'math'))
 sys.path.insert(0, str(code_path / 'regime_engine'))
 sys.path.insert(0, str(code_path / 'shared'))
 
-from detector import RegimeDetector
+from detector import MultiFrequencyRegimeDetector
 from metrics import RegimeMetrics
 import config
 
@@ -90,7 +90,7 @@ def create_state_matrix(data: dict, date_range: pd.DatetimeIndex = None):
 
 def run_regime_detection(state_matrix: pd.DataFrame):
     """Run regime detection on state matrix."""
-    detector = RegimeDetector(
+    detector = MultiFrequencyRegimeDetector(
         coherence_threshold=config.REGIME_THRESHOLDS['coherence_min']
     )
     

@@ -35,14 +35,20 @@ from pathlib import Path
 # Add math module to path
 sys.path.insert(0, str(Path(__file__).parent.parent / 'math'))
 
-from vcf_geometry import VCFGeometry
-from vcf_coherence import VCFCoherence
-from vcf_normalization import VCFNormalization
+from vcf_geometry import GeometricAnalyzer
+from vcf_coherence import CoherenceEngine
+from vcf_normalization import VCFNormalizer
 
-from .config import PILOT_INPUTS, FREQUENCY_BANDS, REGIME_THRESHOLDS
+try:
+    from .config import PILOT_INPUTS, FREQUENCY_BANDS, REGIME_THRESHOLDS
+except ImportError:
+    import config
+    PILOT_INPUTS = config.PILOT_INPUTS
+    FREQUENCY_BANDS = config.FREQUENCY_BANDS
+    REGIME_THRESHOLDS = config.REGIME_THRESHOLDS
 
 
-class RegimeDetector:
+class MultiFrequencyRegimeDetector:
     """
     Multi-scale regime detection using geometric analysis.
     """
@@ -62,11 +68,11 @@ class RegimeDetector:
         """
         self.coherence_threshold = coherence_threshold
         self.magnitude_percentiles = magnitude_percentiles
-        
+
         # Initialize analysis engines
-        self.geometry = VCFGeometry()
-        self.coherence = VCFCoherence()
-        self.normalizer = VCFNormalization()
+        self.geometry = GeometricAnalyzer()
+        self.coherence = CoherenceEngine()
+        self.normalizer = VCFNormalizer()
         
     def detect_regime(self, 
                       state_vector: np.ndarray,
