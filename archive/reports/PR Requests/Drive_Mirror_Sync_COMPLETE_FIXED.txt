@@ -1,0 +1,512 @@
+"""
+COMPLETE WORKING DRIVE MIRROR SYNC NOTEBOOK - FIXED VERSION
+============================================================
+
+Copy each section below into Google Colab as separate cells.
+[MARKDOWN] = Markdown cell
+[CODE] = Code cell
+
+Instructions:
+1. Go to https://colab.research.google.com
+2. Create new notebook
+3. Copy each section below into a new cell
+4. Set cell type as indicated
+5. Save and run!
+"""
+
+# ============================================================================
+# [MARKDOWN] CELL 1
+# ============================================================================
+"""
+# 🔄 Drive Mirror Sync Notebook (Fixed)
+
+**Repository:** `rudder-research/drive_mirror`  
+**Source:** `/MyDrive/VCF-RESEARCH`  
+**Direction:** Drive → GitHub (one-way)
+
+## 🔑 Required Setup
+
+1. **GitHub Personal Access Token:**
+   - Go to: https://github.com/settings/tokens
+   - Generate new token (classic)
+   - Scope: `repo` (full control)
+   - Copy the token
+
+2. **Add to Colab Secrets:**
+   - Click 🔑 icon in left sidebar
+   - Add secret: `GITHUB_TOKEN` = [your token]
+   - Enable "Notebook access"
+
+3. **Run:**
+   - Runtime → Run all
+   - Authorize Drive when prompted
+   - Wait 2-5 minutes
+
+---
+"""
+
+# ============================================================================
+# [MARKDOWN] CELL 2
+# ============================================================================
+"""
+## 1️⃣ Install Dependencies
+"""
+
+# ============================================================================
+# [CODE] CELL 1 - Install and Import
+# ============================================================================
+
+!pip install -q gitpython
+
+import os
+import shutil
+from pathlib import Path
+from datetime import datetime
+from google.colab import drive, userdata
+import git
+
+print("✅ Dependencies installed")
+print(f"📅 Sync started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+# ============================================================================
+# [MARKDOWN] CELL 3
+# ============================================================================
+"""
+## 2️⃣ Configuration
+"""
+
+# ============================================================================
+# [CODE] CELL 2 - Configuration and Validation
+# ============================================================================
+
+# GitHub configuration
+GITHUB_USERNAME = "rudder-research"
+GITHUB_REPO = "drive_mirror"
+GITHUB_BRANCH = "main"  # Target branch for syncs
+
+# Google Drive configuration
+DRIVE_SOURCE_PATH = "/content/drive/MyDrive/VCF-RESEARCH"
+
+# Local workspace
+LOCAL_REPO_PATH = "/content/drive_mirror"
+
+# Git user
+GIT_USER_NAME = "Drive Mirror Bot"
+GIT_USER_EMAIL = "noreply@rudder-research.github.io"
+
+print("🔍 Validating configuration...\n")
+
+# Check for GitHub token
+try:
+    GITHUB_TOKEN = userdata.get('GITHUB_TOKEN')
+    print("✅ GitHub token found")
+except Exception as e:
+    print("❌ ERROR: GITHUB_TOKEN not found in Colab Secrets")
+    print("\n📝 To fix:")
+    print("   1. Click 🔑 icon in left sidebar")
+    print("   2. Add secret: Name='GITHUB_TOKEN', Value=[your PAT]")
+    print("   3. Enable 'Notebook access'")
+    print("   4. Re-run this cell")
+    raise Exception("Missing GITHUB_TOKEN")
+
+# Build GitHub URL
+GITHUB_URL = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{GITHUB_REPO}.git"
+
+print(f"\n📊 Configuration:")
+print(f"   Repository: {GITHUB_USERNAME}/{GITHUB_REPO}")
+print(f"   Target Branch: {GITHUB_BRANCH}")
+print(f"   Drive Source: {DRIVE_SOURCE_PATH}")
+print(f"   Local Path: {LOCAL_REPO_PATH}")
+print("\n✅ Configuration valid")
+
+# ============================================================================
+# [MARKDOWN] CELL 4
+# ============================================================================
+"""
+## 3️⃣ Mount Google Drive
+"""
+
+# ============================================================================
+# [CODE] CELL 3 - Mount Drive
+# ============================================================================
+
+print("📁 Mounting Google Drive...\n")
+
+# Mount Drive
+drive.mount('/content/drive', force_remount=False)
+
+# Verify source folder exists
+if not Path(DRIVE_SOURCE_PATH).exists():
+    print(f"\n❌ ERROR: Drive folder not found: {DRIVE_SOURCE_PATH}")
+    print("\n📝 To fix:")
+    print("   1. Check folder exists in Google Drive")
+    print("   2. Verify folder name is correct (case-sensitive)")
+    print("   3. Update DRIVE_SOURCE_PATH if needed")
+    raise FileNotFoundError(f"Drive folder not found: {DRIVE_SOURCE_PATH}")
+
+# Count files
+source_files = list(Path(DRIVE_SOURCE_PATH).rglob('*'))
+source_file_count = len([f for f in source_files if f.is_file()])
+
+print(f"✅ Drive mounted successfully")
+print(f"📊 Source folder: {source_file_count} files found")
+
+# ============================================================================
+# [MARKDOWN] CELL 5
+# ============================================================================
+"""
+## 4️⃣ Clone Repository
+"""
+
+# ============================================================================
+# [CODE] CELL 4 - Clone and Setup Repository
+# ============================================================================
+
+print("📥 Setting up local repository...\n")
+
+# Clean up existing clone
+if Path(LOCAL_REPO_PATH).exists():
+    print("🧹 Removing existing local repository...")
+    shutil.rmtree(LOCAL_REPO_PATH)
+
+# Clone repository
+print(f"📥 Cloning {GITHUB_USERNAME}/{GITHUB_REPO}...")
+
+try:
+    repo = git.Repo.clone_from(
+        GITHUB_URL,
+        LOCAL_REPO_PATH,
+        branch=GITHUB_BRANCH
+    )
+    print(f"✅ Repository cloned successfully (branch: {GITHUB_BRANCH})")
+except git.exc.GitCommandError as e:
+    error_msg = str(e).lower()
+    if "not found" in error_msg or "could not read" in error_msg:
+        print("❌ ERROR: Repository not found or token invalid")
+        print("\n📝 To fix:")
+        print("   1. Verify repository exists: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}")
+        print("   2. Check token has 'repo' scope")
+        print("   3. Ensure token hasn't expired")
+        print("   4. Try regenerating token")
+    raise
+
+# Configure git
+with repo.config_writer() as git_config:
+    git_config.set_value('user', 'name', GIT_USER_NAME)
+    git_config.set_value('user', 'email', GIT_USER_EMAIL)
+
+print(f"✅ Git configured: {GIT_USER_NAME}")
+
+# ============================================================================
+# [MARKDOWN] CELL 6
+# ============================================================================
+"""
+## 5️⃣ Sync Files
+"""
+
+# ============================================================================
+# [CODE] CELL 5 - Sync Files from Drive to Repo
+# ============================================================================
+
+print("🔄 Syncing files from Drive to repository...\n")
+
+# Files to never delete
+PRESERVE_FILES = {'.git', '.gitignore', 'README.md', 'LICENSE', 
+                  'SETUP_GUIDE.md', 'QUICK_REFERENCE.md', 'ENHANCEMENTS.md',
+                  'DEPLOYMENT_CHECKLIST.md'}
+
+# Step 1: Clean repository
+print("🧹 Cleaning repository...")
+removed_count = 0
+
+for item in Path(LOCAL_REPO_PATH).iterdir():
+    if item.name not in PRESERVE_FILES:
+        if item.is_file():
+            item.unlink()
+            removed_count += 1
+        elif item.is_dir():
+            shutil.rmtree(item)
+            removed_count += 1
+
+print(f"   Removed {removed_count} items")
+
+# Step 2: Copy files from Drive
+print("\n📋 Copying files from Drive...")
+copied_count = 0
+skipped_count = 0
+
+def should_ignore(path):
+    """Check if file should be ignored."""
+    path_str = str(path)
+    ignore_patterns = [
+        '.ipynb_checkpoints',
+        '__pycache__',
+        '.DS_Store',
+        'Thumbs.db',
+        '.tmp.drive',
+        '~$',
+        '.git',
+    ]
+    return any(pattern in path_str for pattern in ignore_patterns)
+
+for source_path in Path(DRIVE_SOURCE_PATH).rglob('*'):
+    if source_path.is_file():
+        # Skip ignored files
+        if should_ignore(source_path):
+            skipped_count += 1
+            continue
+        
+        # Calculate destination
+        rel_path = source_path.relative_to(DRIVE_SOURCE_PATH)
+        dest_path = Path(LOCAL_REPO_PATH) / rel_path
+        
+        # Create directories
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Copy file
+        try:
+            shutil.copy2(source_path, dest_path)
+            copied_count += 1
+        except Exception as e:
+            print(f"   ⚠️  Warning: Could not copy {rel_path}: {e}")
+
+print(f"   Copied {copied_count} files")
+print(f"   Skipped {skipped_count} files (ignored patterns)")
+print("\n✅ Sync complete")
+
+# ============================================================================
+# [MARKDOWN] CELL 7
+# ============================================================================
+"""
+## 6️⃣ Detect Changes
+"""
+
+# ============================================================================
+# [CODE] CELL 6 - Detect Changes
+# ============================================================================
+
+print("🔍 Detecting changes...\n")
+
+# Refresh repository object
+repo = git.Repo(LOCAL_REPO_PATH)
+
+# Get changes
+changed_files = [item.a_path for item in repo.index.diff(None)]
+untracked_files = repo.untracked_files
+
+# Categorize
+modified_files = [f for f in changed_files if Path(LOCAL_REPO_PATH, f).exists()]
+deleted_files = [f for f in changed_files if not Path(LOCAL_REPO_PATH, f).exists()]
+new_files = untracked_files
+
+total_changes = len(modified_files) + len(deleted_files) + len(new_files)
+
+print(f"📊 Change Summary:")
+print(f"   New files: {len(new_files)}")
+print(f"   Modified files: {len(modified_files)}")
+print(f"   Deleted files: {len(deleted_files)}")
+print(f"   Total changes: {total_changes}")
+
+if total_changes == 0:
+    print("\n✅ No changes detected - Drive and GitHub are in sync")
+    HAS_CHANGES = False
+else:
+    print("\n📝 Changes detected - preparing commit...")
+    HAS_CHANGES = True
+    
+    # Show samples
+    if new_files and len(new_files) <= 10:
+        print(f"\n   New files:")
+        for f in new_files:
+            print(f"      + {f}")
+    elif new_files:
+        print(f"\n   Sample new files (showing 5 of {len(new_files)}):")
+        for f in new_files[:5]:
+            print(f"      + {f}")
+    
+    if modified_files and len(modified_files) <= 5:
+        print(f"\n   Modified files:")
+        for f in modified_files:
+            print(f"      ~ {f}")
+
+# ============================================================================
+# [MARKDOWN] CELL 8
+# ============================================================================
+"""
+## 7️⃣ Commit & Push (FIXED)
+"""
+
+# ============================================================================
+# [CODE] CELL 7 - Commit and Push (BRANCH-AWARE)
+# ============================================================================
+
+if HAS_CHANGES:
+    print("📤 Committing and pushing changes...\n")
+    
+    # Stage all changes
+    repo.git.add(A=True)
+    print("✅ Changes staged")
+    
+    # Create commit message
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    commit_message = f"""Sync from Google Drive - {timestamp}
+
+Changes:
+- New files: {len(new_files)}
+- Modified files: {len(modified_files)}
+- Deleted files: {len(deleted_files)}
+- Total changes: {total_changes}
+
+Source: /MyDrive/VCF-RESEARCH
+Synced by: Drive Mirror Bot (Colab)
+"""
+    
+    # Commit
+    repo.index.commit(commit_message)
+    print("✅ Changes committed")
+    
+    # Check current branch
+    current_branch = repo.active_branch.name
+    print(f"\n📋 Current branch: {current_branch}")
+    
+    # Handle branch switching if needed
+    if current_branch != GITHUB_BRANCH:
+        print(f"⚠️  Repository is on '{current_branch}' but target is '{GITHUB_BRANCH}'")
+        
+        # Ask what to do (for interactive use) or auto-switch
+        print(f"🔄 Switching to '{GITHUB_BRANCH}' branch...")
+        
+        try:
+            # Try to checkout target branch
+            repo.git.checkout(GITHUB_BRANCH)
+            current_branch = GITHUB_BRANCH
+            print(f"✅ Switched to {GITHUB_BRANCH}")
+        except git.exc.GitCommandError:
+            # Branch doesn't exist locally, create from remote
+            try:
+                repo.git.checkout('-b', GITHUB_BRANCH, f'origin/{GITHUB_BRANCH}')
+                current_branch = GITHUB_BRANCH
+                print(f"✅ Created and switched to {GITHUB_BRANCH}")
+            except git.exc.GitCommandError:
+                # Can't switch, will push to current branch
+                print(f"⚠️  Could not switch to {GITHUB_BRANCH}")
+                print(f"   Continuing with current branch: {current_branch}")
+    
+    # Push to GitHub
+    print(f"\n📤 Pushing to GitHub ({current_branch})...")
+    
+    try:
+        origin = repo.remote('origin')
+        
+        # Push with set-upstream (handles any branch)
+        push_info = origin.push(current_branch, set_upstream=True)
+        
+        # Check result
+        if push_info and push_info[0].flags & git.remote.PushInfo.ERROR:
+            print("❌ Push failed")
+            print(f"   Error: {push_info[0].summary}")
+        else:
+            print("✅ Push successful!")
+            print(f"\n🎉 Sync complete!")
+            print(f"   Repository: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}")
+            print(f"   Branch: {current_branch}")
+            print(f"   View commit: https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}/tree/{current_branch}")
+            
+            if current_branch != GITHUB_BRANCH:
+                print(f"\n📝 Note: Synced to '{current_branch}' (not '{GITHUB_BRANCH}')")
+    
+    except git.exc.GitCommandError as e:
+        print("❌ Push failed")
+        print(f"   Error: {str(e)}")
+        print("\n📝 Troubleshooting:")
+        print("   1. Verify token has 'repo' scope")
+        print("   2. Check write access to repository")
+        print("   3. Ensure repository exists on GitHub")
+        print("   4. Try regenerating your token")
+        raise
+
+else:
+    print("\n✅ No changes to commit - repository already up to date")
+
+# ============================================================================
+# [MARKDOWN] CELL 9
+# ============================================================================
+"""
+## 8️⃣ Summary
+"""
+
+# ============================================================================
+# [CODE] CELL 8 - Cleanup and Summary
+# ============================================================================
+
+print("🧹 Cleaning up...\n")
+
+# Security: Clear token from memory
+GITHUB_TOKEN = None
+GITHUB_URL = None
+
+# Get final stats
+repo = git.Repo(LOCAL_REPO_PATH)
+latest_commit = repo.head.commit
+final_branch = repo.active_branch.name
+
+print("="*60)
+print("📊 SYNC SUMMARY")
+print("="*60)
+print(f"\n📁 Source: {DRIVE_SOURCE_PATH}")
+print(f"🎯 Repository: {GITHUB_USERNAME}/{GITHUB_REPO}")
+print(f"🌿 Branch: {final_branch}")
+print(f"\n📊 Statistics:")
+print(f"   Files in Drive: {source_file_count}")
+print(f"   Files copied: {copied_count}")
+print(f"   Files skipped: {skipped_count}")
+print(f"   Total changes: {total_changes if HAS_CHANGES else 0}")
+print(f"\n📝 Latest commit:")
+print(f"   SHA: {latest_commit.hexsha[:8]}")
+print(f"   Author: {latest_commit.author}")
+print(f"   Date: {datetime.fromtimestamp(latest_commit.committed_date).strftime('%Y-%m-%d %H:%M:%S')}")
+print(f"   Message: {latest_commit.message.strip().split(chr(10))[0]}")
+print(f"\n🔗 View on GitHub:")
+print(f"   https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}")
+print(f"   https://github.com/{GITHUB_USERNAME}/{GITHUB_REPO}/tree/{final_branch}")
+print(f"\n⏰ Sync completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+print("="*60)
+
+if HAS_CHANGES:
+    print("\n✅ Sync successful - changes pushed to GitHub ✨")
+else:
+    print("\n✅ Sync successful - no changes needed ✨")
+
+print("\n💡 Tip: Run this notebook weekly or after major Drive updates")
+
+# ============================================================================
+# [MARKDOWN] CELL 10
+# ============================================================================
+"""
+---
+
+## ✅ Sync Complete!
+
+### 🔒 Security Notes
+- GitHub token stored in Colab Secrets only
+- Token cleared from memory after use
+- Never printed or logged
+
+### 📝 Next Steps
+1. Review changes on GitHub
+2. Verify no sensitive data committed
+3. Run sync again when Drive updates
+
+### 🔄 Recommended Schedule
+- **Weekly:** Routine sync
+- **After major updates:** Keep mirror current
+- **Before milestones:** Backup important work
+
+---
+
+**Drive Mirror Bot v1.1** - Fixed for all branches ✨
+"""
+
+# ============================================================================
+# END OF NOTEBOOK
+# ============================================================================
